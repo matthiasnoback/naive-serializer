@@ -1,0 +1,180 @@
+<?php
+declare(strict_types = 1);
+
+namespace NaiveSerializer;
+
+use Assert\Assertion;
+use phpDocumentor\Reflection\DocBlock;
+use phpDocumentor\Reflection\DocBlock\Tags\Var_;
+use phpDocumentor\Reflection\DocBlockFactory;
+use phpDocumentor\Reflection\Fqsen;
+use phpDocumentor\Reflection\Type;
+use phpDocumentor\Reflection\Types\Array_;
+use phpDocumentor\Reflection\Types\Boolean;
+use phpDocumentor\Reflection\Types\ContextFactory;
+use phpDocumentor\Reflection\Types\Float_;
+use phpDocumentor\Reflection\Types\Integer;
+use phpDocumentor\Reflection\Types\Object_;
+use phpDocumentor\Reflection\Types\String_;
+
+final class JsonSerializer
+{
+    private $contextFactory;
+    private $docblockFactory;
+
+    public static function deserialize(string $class, string $jsonEncodedData)
+    {
+        return (new self())->doDeserialize($class, $jsonEncodedData);
+    }
+
+    public static function serialize($object)
+    {
+        return (new self())->doSerialize($object);
+    }
+
+    private function __construct()
+    {
+        $this->contextFactory = new ContextFactory();
+        $this->docblockFactory = DocBlockFactory::createInstance();
+    }
+
+    private function doDeserialize(string $class, string $jsonEncodedData)
+    {
+        return self::restoreDataStructure(new Object_(new Fqsen('\\' . $class)), $this->jsonDecode($jsonEncodedData));
+    }
+
+    private function restoreDataStructure(Type $type, $data)
+    {
+        if ($data === null) {
+            // TODO verify that null is allowed
+            return null;
+        }
+        if ($type instanceof String_) {
+            return (string)$data;
+        }
+        if ($type instanceof Integer) {
+            return (integer)$data;
+        }
+        if ($type instanceof Boolean) {
+            return (boolean)$data;
+        }
+        if ($type instanceof Float_) {
+            return (float)$data;
+        }
+
+        if ($type instanceof Object_) {
+            Assertion::isArray($data);
+            $reflection = new \ReflectionClass((string)$type);
+            if (!$reflection->isUserDefined()) {
+                throw new \LogicException(sprintf('Class "%s" is not user-defined', $type));
+            }
+
+            $object = $reflection->newInstanceWithoutConstructor();
+            foreach ($reflection->getProperties() as $property) {
+                if (!array_key_exists($property->getName(), $data)) {
+                    continue;
+                }
+
+                $propertyType = $this->resolvePropertyType($property, $reflection);
+                $property->setAccessible(true);
+                $property->setValue($object, self::restoreDataStructure($propertyType, $data[$property->getName()]));
+            }
+            return $object;
+        }
+
+        if ($type instanceof Array_) {
+            Assertion::isArray($data);
+            Assertion::isInstanceOf($type->getValueType(), Object_::class, 'Only lists of objects are supported');
+
+            $processed = [];
+            foreach ($data as $elementData) {
+                $processed[] = self::restoreDataStructure($type->getValueType(), $elementData);
+            }
+
+            return $processed;
+        }
+
+        throw new \LogicException('Unsupported type: ' . get_class($type));
+    }
+
+    private function doSerialize($object)
+    {
+        return json_encode($this->extractSerializableDataFrom($object), JSON_PRETTY_PRINT);
+    }
+
+    private function extractSerializableDataFrom($something)
+    {
+        if (is_object($something)) {
+            $data = [];
+
+            $reflection = new \ReflectionClass(get_class($something));
+            if (!$reflection->isUserDefined()) {
+                throw new \LogicException(sprintf('Class "%s" is not user-defined', $reflection->getName()));
+            }
+
+            foreach ($reflection->getProperties() as $property) {
+                $property->setAccessible(true);
+                $data[$property->getName()] = $this->extractSerializableDataFrom($property->getValue($something));
+            }
+
+            return $data;
+        }
+
+        if (is_array($something)) {
+            $data = [];
+            foreach ($something as $element) {
+                $data[] = $this->extractSerializableDataFrom($element);
+            }
+
+            return $data;
+        }
+
+        if (is_scalar($something) || $something === null) {
+            return $something;
+        }
+
+        throw new \LogicException(sprintf(
+            'Unsupported type: "%s" (%s). You can only serialize objects, arrays and scalar values.',
+            gettype($something),
+            var_export($something, true)
+        ));
+    }
+
+    private function resolvePropertyType(\ReflectionProperty $property, \ReflectionClass $class) : Type
+    {
+        $fileName = $class->getFileName();
+        Assertion::file($fileName, sprintf(
+            'Class "%s" has no source file, maybe it is a PHP built-in class?',
+            $class->getName()
+        ));
+        $context = $this->contextFactory->createForNamespace(
+            $class->getNamespaceName(),
+            file_get_contents($fileName)
+        );
+
+        $docComment = $property->getDocComment();
+        Assertion::notEmpty($docComment, sprintf('You need to add a docblock to property "%s"', $property->getName()));
+
+        $docblock = $this->docblockFactory->create($docComment, $context);
+        $varTags = $docblock->getTagsByName('var');
+        Assertion::count(
+            $varTags,
+            1,
+            sprintf('You need to add an @var annotation to property "%s"', $property->getName())
+        );
+        /** @var Var_[] $varTags */
+        $propertyType = $varTags[0]->getType();
+
+        return $propertyType;
+    }
+
+    private function jsonDecode(string $jsonEncodedData) : array
+    {
+        $decoded = json_decode($jsonEncodedData, true);
+        if ($decoded === null && json_last_error()) {
+            throw new \LogicException('You provided invalid JSON: ' . json_last_error_msg());
+        }
+
+        return $decoded;
+    }
+}
