@@ -20,7 +20,7 @@ In order to make this work, this library restricts you to using only values of t
 
 Furthermore, you need to define the types you used in standard `@var` docblock annotations (as you probably already do), e.g.
 
-~~~language-php
+```php
 /**
  * @var string
  *
@@ -36,19 +36,19 @@ Furthermore, you need to define the types you used in standard `@var` docblock a
  *
  * @var Fully\Qualified\Class\Name
  */
-~~~
+```
 
 Of course, every property should have just one `@var` annotation.
 
 You can define lists of the above types by simply adding `[]` to the `@var` annotation, e.g.
  
-~~~language-php
+```php
 @var Fully\Qualified\Class\Name
-~~~
+```
 
 To work around the limitation that you can't use PHP's built-in classes, simply convert the data internally to something else. For example, to use a `\DateTimeImmutable` timestamp:
 
-~~~language-php
+```php
 /**
  * @var string
  */
@@ -63,29 +63,29 @@ public function getTimestamp() : \DateTimeImmutable
 {
     return \DateTimeImmutable::createFromFormat(\DateTime::ISO8601, $this->timestamp);
 }
-~~~
+```
 
 To use the serializer:
 
-~~~language-php
+```php
 // create an object
 $object  = ...;
 
 $serializedData = JsonSerializer::serialize($object);
 
 // $serializedData will be a pretty-printed JSON string
-~~~
+```
 
 To deserialize the data:
 
-~~~language-php
+```php
 $restoredObject = JsonSerializer::deserialize(
     Fully\Qualified\Class\Name::class, 
     $serializedData
 );
 
 // $restoredObject will be of type Fully\Qualified\Class\Name
-~~~
+```
 
 # Thanks
 
