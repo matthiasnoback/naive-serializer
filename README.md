@@ -43,7 +43,9 @@ Of course, every property should have just one `@var` annotation.
 You can define lists of the above types by simply adding `[]` to the `@var` annotation, e.g.
  
 ```php
-@var Fully\Qualified\Class\Name
+/**
+ * @var Fully\Qualified\Class\Name[]
+ */
 ```
 
 To work around the limitation that you can't use PHP's built-in classes, simply convert the data internally to something else. For example, to use a `\DateTimeImmutable` timestamp:
