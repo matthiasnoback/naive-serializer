@@ -21,6 +21,7 @@ final class JsonSerializer
 {
     private $contextFactory;
     private $docblockFactory;
+    private $typeResolver;
 
     public static function deserialize(string $class, string $jsonEncodedData)
     {
