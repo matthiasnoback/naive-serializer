@@ -8,6 +8,7 @@ use NaiveSerializer\Test\Unit\Fixtures\DefaultValue;
 use NaiveSerializer\Test\Unit\Fixtures\NoDocblock;
 use NaiveSerializer\Test\Unit\Fixtures\NoVarAnnotation;
 use NaiveSerializer\Test\Unit\Fixtures\NullIsAllowed;
+use NaiveSerializer\Test\Unit\Fixtures\SimpleClass;
 use NaiveSerializer\Test\Unit\Fixtures\SupportedCases;
 use NaiveSerializer\Test\Unit\Fixtures\UnsupportedType;
 
@@ -151,6 +152,20 @@ EOD;
         $expected->nullIsAllowed = null;
 
         $actual = JsonSerializer::deserialize(NullIsAllowed::class, '{"nullIsAllowed":null}');
+
+        $this->assertEquals($expected, $actual);
+    }
+
+    /**
+     * @test
+     */
+    public function you_can_deserialize_an_array()
+    {
+        $object = new SimpleClass();
+        $object->property = 'value';
+        $expected = [$object];
+
+        $actual = JsonSerializer::deserialize(SimpleClass::class . '[]', '[{"property":"value"}]');
 
         $this->assertEquals($expected, $actual);
     }

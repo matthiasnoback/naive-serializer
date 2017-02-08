@@ -7,8 +7,8 @@ use Assert\Assertion;
 use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\DocBlock\Tags\Var_;
 use phpDocumentor\Reflection\DocBlockFactory;
-use phpDocumentor\Reflection\Fqsen;
 use phpDocumentor\Reflection\Type;
+use phpDocumentor\Reflection\TypeResolver;
 use phpDocumentor\Reflection\Types\Array_;
 use phpDocumentor\Reflection\Types\Boolean;
 use phpDocumentor\Reflection\Types\ContextFactory;
@@ -36,11 +36,14 @@ final class JsonSerializer
     {
         $this->contextFactory = new ContextFactory();
         $this->docblockFactory = DocBlockFactory::createInstance();
+        $this->typeResolver = new TypeResolver();
     }
 
-    private function doDeserialize(string $class, string $jsonEncodedData)
+    private function doDeserialize(string $type, string $jsonEncodedData)
     {
-        return self::restoreDataStructure(new Object_(new Fqsen('\\' . $class)), $this->jsonDecode($jsonEncodedData));
+        $resolvedType = $this->typeResolver->resolve($type);
+
+        return self::restoreDataStructure($resolvedType, $this->jsonDecode($jsonEncodedData));
     }
 
     private function restoreDataStructure(Type $type, $data)
