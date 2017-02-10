@@ -29,4 +29,9 @@ final class SupportedCases
      * @var float
      */
     public $e;
+
+    /**
+     * @var array
+     */
+    public $f;
 }

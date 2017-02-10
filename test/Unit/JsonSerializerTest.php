@@ -28,6 +28,7 @@ class JsonSerializerTest extends \PHPUnit_Framework_TestCase
         $original->c = [$originalSub];
         $original->d = true;
         $original->e = 1.23;
+        $original->f = ["key" => "value"];
 
         $serialized = JsonSerializer::serialize($original);
 
@@ -41,11 +42,15 @@ class JsonSerializerTest extends \PHPUnit_Framework_TestCase
             "b": 2,
             "c": [],
             "d": null,
-            "e": null
+            "e": null,
+            "f": null
         }
     ],
     "d": true,
-    "e": 1.23
+    "e": 1.23,
+    "f": {
+        "key": "value"
+    }
 }
 EOD;
 
@@ -132,16 +137,6 @@ EOD;
         JsonSerializer::serialize(new UnsupportedType());
     }
 
-    /**
-     * @test
-     */
-    public function it_can_not_deserialize_unsupported_types()
-    {
-        $this->expectException(\LogicException::class);
-        $this->expectExceptionMessage('Unsupported type');
-
-        JsonSerializer::deserialize(UnsupportedType::class, '{"unsupportedType":"..."}');
-    }
 
     /**
      * @test
