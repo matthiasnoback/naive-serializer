@@ -15,7 +15,7 @@ In order to make this work, this library restricts you to using only values of t
 - `null`
 - scalar (int, float, bool)
 - user-defined objects (so no built-in PHP classes like `\DateTimeImmutable`)
-- arrays where keys are irrelevant
+- arrays where every value is of the same type (maps or lists)
 - and any combination of the above
 
 Furthermore, you need to define the types you used in standard `@var` docblock annotations (as you probably already do), e.g.

@@ -87,12 +87,9 @@ final class JsonSerializer
         }
 
         if ($type instanceof Array_) {
-            Assertion::isArray($data);
-            Assertion::isInstanceOf($type->getValueType(), Object_::class, 'Only lists of objects are supported');
-
             $processed = [];
-            foreach ($data as $elementData) {
-                $processed[] = self::restoreDataStructure($type->getValueType(), $elementData);
+            foreach ($data as $key => $elementData) {
+                $processed[$key] = self::restoreDataStructure($type->getValueType(), $elementData);
             }
 
             return $processed;
@@ -126,8 +123,8 @@ final class JsonSerializer
 
         if (is_array($something)) {
             $data = [];
-            foreach ($something as $element) {
-                $data[] = $this->extractSerializableDataFrom($element);
+            foreach ($something as $key => $element) {
+                $data[$key] = $this->extractSerializableDataFrom($element);
             }
 
             return $data;

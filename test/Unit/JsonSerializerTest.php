@@ -4,6 +4,7 @@ declare(strict_types = 1);
 namespace NaiveSerializer\Test\Unit;
 
 use NaiveSerializer\JsonSerializer;
+use NaiveSerializer\Test\Unit\Fixtures\ArrayCases;
 use NaiveSerializer\Test\Unit\Fixtures\DefaultValue;
 use NaiveSerializer\Test\Unit\Fixtures\NoDocblock;
 use NaiveSerializer\Test\Unit\Fixtures\NoVarAnnotation;
@@ -52,6 +53,41 @@ EOD;
         $this->assertJsonStringEqualsJsonString($expectedJson, $serialized);
 
         $deserialized = JsonSerializer::deserialize(Fixtures\SupportedCases::class, $serialized);
+
+        $this->assertEquals($original, $deserialized);
+    }
+
+    /**
+     * @test
+     */
+    public function it_serializes_and_deserializes_multiple_types_of_arrays()
+    {
+        $original = new ArrayCases();
+        $original->intList = [1, 2, 3];
+        $original->stringList = ['a', 'b', 'c'];
+        $original->intToStringMap = [1 => 'b', 2 => 'c'];
+        $original->stringToStringMap = ['a' => 'A', 'b' => 'B', 'c' => 'C'];
+
+        $serialized = JsonSerializer::serialize($original);
+
+        $expectedJson = <<<EOD
+{
+    "intList": [1, 2, 3],
+    "stringList": ["a", "b", "c"],
+    "intToStringMap": {
+        "1": "b",
+        "2": "c"
+    },
+    "stringToStringMap": {
+        "a": "A",
+        "b": "B",
+        "c": "C"
+    }
+}
+EOD;
+        $this->assertJsonStringEqualsJsonString($expectedJson, $serialized);
+
+        $deserialized = JsonSerializer::deserialize(ArrayCases::class, $serialized);
 
         $this->assertEquals($original, $deserialized);
     }
