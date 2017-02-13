@@ -4,6 +4,7 @@ declare(strict_types = 1);
 namespace NaiveSerializer\Test\Unit;
 
 use NaiveSerializer\JsonSerializer;
+use NaiveSerializer\Serializer;
 use NaiveSerializer\Test\Unit\Fixtures\ArrayCases;
 use NaiveSerializer\Test\Unit\Fixtures\DefaultValue;
 use NaiveSerializer\Test\Unit\Fixtures\NoDocblock;
@@ -30,7 +31,7 @@ class JsonSerializerTest extends \PHPUnit_Framework_TestCase
         $original->d = true;
         $original->e = 1.23;
 
-        $serialized = JsonSerializer::serialize($original);
+        $serialized = Serializer::serialize($original);
 
         $expectedJson = <<<EOD
 {
@@ -52,7 +53,7 @@ EOD;
 
         $this->assertJsonStringEqualsJsonString($expectedJson, $serialized);
 
-        $deserialized = JsonSerializer::deserialize(Fixtures\SupportedCases::class, $serialized);
+        $deserialized = Serializer::deserialize(Fixtures\SupportedCases::class, $serialized);
 
         $this->assertEquals($original, $deserialized);
     }
@@ -68,7 +69,7 @@ EOD;
         $original->intToStringMap = [1 => 'b', 2 => 'c'];
         $original->stringToStringMap = ['a' => 'A', 'b' => 'B', 'c' => 'C'];
 
-        $serialized = JsonSerializer::serialize($original);
+        $serialized = Serializer::serialize($original);
 
         $expectedJson = <<<EOD
 {
@@ -87,7 +88,7 @@ EOD;
 EOD;
         $this->assertJsonStringEqualsJsonString($expectedJson, $serialized);
 
-        $deserialized = JsonSerializer::deserialize(ArrayCases::class, $serialized);
+        $deserialized = Serializer::deserialize(ArrayCases::class, $serialized);
 
         $this->assertEquals($original, $deserialized);
     }
@@ -99,7 +100,7 @@ EOD;
     {
         $this->expectException(\LogicException::class);
         $this->expectExceptionMessage('not user-defined');
-        JsonSerializer::deserialize(\DateTime::class, '{}');
+        Serializer::deserialize(\DateTime::class, '{}');
     }
 
     /**
@@ -109,7 +110,7 @@ EOD;
     {
         $this->expectException(\LogicException::class);
         $this->expectExceptionMessage('not user-defined');
-        JsonSerializer::serialize(new \DateTime());
+        Serializer::serialize(new \DateTime());
     }
 
     /**
@@ -120,7 +121,7 @@ EOD;
         $this->expectException(\LogicException::class);
         $this->expectExceptionMessage('invalid JSON');
 
-        JsonSerializer::deserialize(SupportedCases::class, '[invalid JSON');
+        Serializer::deserialize(SupportedCases::class, '[invalid JSON');
     }
 
     /**
@@ -131,7 +132,7 @@ EOD;
         $this->expectException(\LogicException::class);
         $this->expectExceptionMessage('docblock');
 
-        JsonSerializer::deserialize(NoDocblock::class, '{"noDocblock":"..."}');
+        Serializer::deserialize(NoDocblock::class, '{"noDocblock":"..."}');
     }
 
     /**
@@ -142,7 +143,7 @@ EOD;
         $this->expectException(\LogicException::class);
         $this->expectExceptionMessage('@var annotation');
 
-        JsonSerializer::deserialize(NoVarAnnotation::class, '{"noVarAnnotation":"..."}');
+        Serializer::deserialize(NoVarAnnotation::class, '{"noVarAnnotation":"..."}');
     }
 
     /**
@@ -152,7 +153,7 @@ EOD;
     {
         $expected = new DefaultValue();
 
-        $actual = JsonSerializer::deserialize(DefaultValue::class, '{}');
+        $actual = Serializer::deserialize(DefaultValue::class, '{}');
 
         $this->assertEquals($expected, $actual);
     }
@@ -165,7 +166,7 @@ EOD;
         $this->expectException(\LogicException::class);
         $this->expectExceptionMessage('Unsupported type');
 
-        JsonSerializer::serialize(new UnsupportedType());
+        Serializer::serialize(new UnsupportedType());
     }
 
     /**
@@ -176,7 +177,7 @@ EOD;
         $this->expectException(\LogicException::class);
         $this->expectExceptionMessage('Unsupported type');
 
-        JsonSerializer::deserialize(UnsupportedType::class, '{"unsupportedType":"..."}');
+        Serializer::deserialize(UnsupportedType::class, '{"unsupportedType":"..."}');
     }
 
     /**
@@ -187,7 +188,7 @@ EOD;
         $expected = new NullIsAllowed();
         $expected->nullIsAllowed = null;
 
-        $actual = JsonSerializer::deserialize(NullIsAllowed::class, '{"nullIsAllowed":null}');
+        $actual = Serializer::deserialize(NullIsAllowed::class, '{"nullIsAllowed":null}');
 
         $this->assertEquals($expected, $actual);
     }
@@ -201,7 +202,7 @@ EOD;
         $object->property = 'value';
         $expected = [$object];
 
-        $actual = JsonSerializer::deserialize(SimpleClass::class . '[]', '[{"property":"value"}]');
+        $actual = Serializer::deserialize(SimpleClass::class . '[]', '[{"property":"value"}]');
 
         $this->assertEquals($expected, $actual);
     }
