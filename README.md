@@ -25,13 +25,13 @@ Furthermore, you need to define the types you used in standard `@var` docblock a
  * @var string
  *
  * @var int
- * 
+ *
  * @var bool
  *
  * You can use a relative class name:
  *
  * @var ClassName
- * 
+ *
  * Or a full class name:
  *
  * @var Fully\Qualified\Class\Name
@@ -41,7 +41,7 @@ Furthermore, you need to define the types you used in standard `@var` docblock a
 Of course, every property should have just one `@var` annotation.
 
 You can define lists of the above types by simply adding `[]` to the `@var` annotation, e.g.
- 
+
 ```php
 /**
  * @var Fully\Qualified\Class\Name[]
@@ -73,7 +73,7 @@ To use the serializer:
 // create an object
 $object  = ...;
 
-$serializedData = JsonSerializer::serialize($object);
+$serializedData = Serializer::serialize($object);
 
 // $serializedData will be a pretty-printed JSON string
 ```
@@ -81,13 +81,15 @@ $serializedData = JsonSerializer::serialize($object);
 To deserialize the data:
 
 ```php
-$restoredObject = JsonSerializer::deserialize(
-    Fully\Qualified\Class\Name::class, 
+$restoredObject = Serializer::deserialize(
+    Fully\Qualified\Class\Name::class,
     $serializedData
 );
 
 // $restoredObject will be of type Fully\Qualified\Class\Name
 ```
+
+If you like, you can create an instance of `JsonSerializer` and call its object methods instead of `Serializer`'s static methods.
 
 # Thanks
 

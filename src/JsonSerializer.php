@@ -23,24 +23,14 @@ final class JsonSerializer
     private $docblockFactory;
     private $typeResolver;
 
-    public static function deserialize(string $class, string $jsonEncodedData)
-    {
-        return (new self())->doDeserialize($class, $jsonEncodedData);
-    }
-
-    public static function serialize($object)
-    {
-        return (new self())->doSerialize($object);
-    }
-
-    private function __construct()
+    public function __construct()
     {
         $this->contextFactory = new ContextFactory();
         $this->docblockFactory = DocBlockFactory::createInstance();
         $this->typeResolver = new TypeResolver();
     }
 
-    private function doDeserialize(string $type, string $jsonEncodedData)
+    public function deserialize(string $type, string $jsonEncodedData)
     {
         $resolvedType = $this->typeResolver->resolve($type);
 
@@ -98,9 +88,9 @@ final class JsonSerializer
         throw new \LogicException('Unsupported type: ' . get_class($type));
     }
 
-    private function doSerialize($object)
+    public function serialize($rawData)
     {
-        return json_encode($this->extractSerializableDataFrom($object), JSON_PRETTY_PRINT);
+        return json_encode($this->extractSerializableDataFrom($rawData), JSON_PRETTY_PRINT);
     }
 
     private function extractSerializableDataFrom($something)
