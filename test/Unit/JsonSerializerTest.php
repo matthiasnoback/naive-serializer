@@ -3,7 +3,6 @@ declare(strict_types = 1);
 
 namespace NaiveSerializer\Test\Unit;
 
-use NaiveSerializer\JsonSerializer;
 use NaiveSerializer\Serializer;
 use NaiveSerializer\Test\Unit\Fixtures\ArrayCases;
 use NaiveSerializer\Test\Unit\Fixtures\DefaultValue;
@@ -13,8 +12,9 @@ use NaiveSerializer\Test\Unit\Fixtures\NullIsAllowed;
 use NaiveSerializer\Test\Unit\Fixtures\SimpleClass;
 use NaiveSerializer\Test\Unit\Fixtures\SupportedCases;
 use NaiveSerializer\Test\Unit\Fixtures\UnsupportedType;
+use PHPUnit\Framework\TestCase;
 
-class JsonSerializerTest extends \PHPUnit_Framework_TestCase
+class JsonSerializerTest extends TestCase
 {
     /**
      * @test
