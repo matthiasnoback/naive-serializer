@@ -2,7 +2,7 @@
   "name": "matthiasnoback/naive-serializer",
   "type": "library",
   "require": {
-    "php": "^7.0",
+    "php": "^7.1",
     "beberlei/assert": "^2.7",
     "phpdocumentor/reflection-docblock": "^4.3"
   },
