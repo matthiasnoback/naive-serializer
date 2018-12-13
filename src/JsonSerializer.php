@@ -16,6 +16,7 @@ use phpDocumentor\Reflection\Types\Float_;
 use phpDocumentor\Reflection\Types\Integer;
 use phpDocumentor\Reflection\Types\Object_;
 use phpDocumentor\Reflection\Types\String_;
+use phpDocumentor\Reflection\Types\Compound;
 
 final class JsonSerializer
 {
@@ -42,6 +43,14 @@ final class JsonSerializer
         if ($data === null) {
             // TODO verify that null is allowed
             return null;
+        }
+        if ($type instanceof Compound) {
+            foreach ($type->getIterator() as $optionalType) {
+
+                if ($result = $this->restoreDataStructure($optionalType, $data)) {
+                    return $result;
+                }
+            }
         }
         if ($type instanceof String_) {
             return (string)$data;
