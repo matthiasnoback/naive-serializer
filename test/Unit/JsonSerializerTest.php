@@ -3,8 +3,16 @@ declare(strict_types = 1);
 
 namespace NaiveSerializer\Test\Unit;
 
+use NaiveSerializer\CollapseToSingleValue;
 use NaiveSerializer\Serializer;
 use NaiveSerializer\Test\Unit\Fixtures\ArrayCases;
+use NaiveSerializer\Test\Unit\Fixtures\CollapseToSingleValue\ChainCheck;
+use NaiveSerializer\Test\Unit\Fixtures\CollapseToSingleValue\ItemAdded;
+use NaiveSerializer\Test\Unit\Fixtures\CollapseToSingleValue\ItemId;
+use NaiveSerializer\Test\Unit\Fixtures\CollapseToSingleValue\ItemIdContainer;
+use NaiveSerializer\Test\Unit\Fixtures\CollapseToSingleValue\ItemIdContainerContainer;
+use NaiveSerializer\Test\Unit\Fixtures\CollapseToSingleValue\Name;
+use NaiveSerializer\Test\Unit\Fixtures\CollapseToSingleValue\Timestamp;
 use NaiveSerializer\Test\Unit\Fixtures\DefaultValue;
 use NaiveSerializer\Test\Unit\Fixtures\NoDocblock;
 use NaiveSerializer\Test\Unit\Fixtures\NoVarAnnotation;
@@ -205,5 +213,85 @@ EOD;
         $actual = Serializer::deserialize(SimpleClass::class . '[]', '[{"property":"value"}]');
 
         $this->assertEquals($expected, $actual);
+    }
+
+    /** @test */
+    public function it_cannot_serialize_top_level_collapsable_objects()
+    {
+        //
+        // Actually not sold on this...
+        //
+        // If return value for serialize could return array|string, we could handle this,
+        // but I'm not sure that 1) makes sense and 2) is desirable.
+        //
+
+        $this->expectException(\LogicException::class);
+        $this->expectExceptionMessageRegExp('/'.str_replace('\\', '\\\\', CollapseToSingleValue::class).'/');
+        $original = Name::fromString('elephpant');
+
+        $serialized = Serializer::serialize($original);
+
+        $expectedJson = <<<EOD
+"elephpant"
+EOD;
+
+        $this->assertJsonStringEqualsJsonString($expectedJson, $serialized);
+
+        $deserialized = Serializer::deserialize(Name::class, $serialized);
+
+        $this->assertEquals($original, $deserialized);
+    }
+
+    /** @test */
+    public function it_serializes_and_deserializes_deep_collapsable_objects()
+    {
+        $original = new ItemAdded(
+            ItemId::fromString('57D44FEF-C6E6-4908-B43D-76AF8295D06A'),
+            Name::fromString('elephpant'),
+            Timestamp::fromSecondsSinceUnixEpochUtc(100)
+        );
+
+        $serialized = Serializer::serialize($original);
+
+        $expectedJson = <<<EOD
+{
+    "itemId": "57D44FEF-C6E6-4908-B43D-76AF8295D06A",
+    "name": "elephpant",
+    "timestamp": {
+        "secondsSinceUnixEpoch": 100,
+        "timeZone": "UTC"
+    }
+}
+EOD;
+
+        $this->assertJsonStringEqualsJsonString($expectedJson, $serialized);
+
+        $deserialized = Serializer::deserialize(ItemAdded::class, $serialized);
+
+        $this->assertEquals($original, $deserialized);
+    }
+
+    /** @test */
+    public function it_serializes_and_deserializes_chained_collapsable_objects()
+    {
+        $itemId = ItemId::fromString('34E2BFF4-3B28-431E-8E1C-A8EC9391B0FB');
+        $itemIdContainer = new ItemIdContainer($itemId);
+        $itemIdContainerContainer = new ItemIdContainerContainer($itemIdContainer);
+        $original = new ChainCheck($itemIdContainer, $itemIdContainerContainer);
+
+        $serialized = Serializer::serialize($original);
+
+        $expectedJson = <<<EOD
+{
+    "itemIdContainer": "34E2BFF4-3B28-431E-8E1C-A8EC9391B0FB",
+    "itemIdContainerContainer": "34E2BFF4-3B28-431E-8E1C-A8EC9391B0FB"
+}
+EOD;
+
+        $this->assertJsonStringEqualsJsonString($expectedJson, $serialized);
+
+        $deserialized = Serializer::deserialize(ChainCheck::class, $serialized);
+
+        $this->assertEquals($original, $deserialized);
     }
 }

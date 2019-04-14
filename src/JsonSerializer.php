@@ -57,14 +57,27 @@ final class JsonSerializer
         }
 
         if ($type instanceof Object_) {
-            Assertion::isArray($data);
             $reflection = new \ReflectionClass((string)$type);
             if (!$reflection->isUserDefined()) {
                 throw new \LogicException(sprintf('Class "%s" is not user-defined', $type));
             }
 
+            $properties = $reflection->getProperties();
+
             $object = $reflection->newInstanceWithoutConstructor();
-            foreach ($reflection->getProperties() as $property) {
+
+            if ($reflection->implementsInterface(CollapseToSingleValue::class)) {
+                $property = $properties[0];
+                $propertyType = $this->resolvePropertyType($property, $reflection);
+                $property->setAccessible(true);
+                $property->setValue($object, self::restoreDataStructure($propertyType, $data));
+
+                return $object;
+            }
+
+            Assertion::isArray($data);
+
+            foreach ($properties as $property) {
                 if (!array_key_exists($property->getName(), $data)) {
                     continue;
                 }
@@ -96,14 +109,22 @@ final class JsonSerializer
     private function extractSerializableDataFrom($something)
     {
         if (is_object($something)) {
-            $data = [];
-
             $reflection = new \ReflectionClass(get_class($something));
             if (!$reflection->isUserDefined()) {
                 throw new \LogicException(sprintf('Class "%s" is not user-defined', $reflection->getName()));
             }
 
-            foreach ($reflection->getProperties() as $property) {
+            $properties = $reflection->getProperties();
+
+            if ($reflection->implementsInterface(CollapseToSingleValue::class)) {
+                $property = $properties[0];
+                $property->setAccessible(true);
+                return $this->extractSerializableDataFrom($property->getValue($something));
+            }
+
+            $data = [];
+
+            foreach ($properties as $property) {
                 $property->setAccessible(true);
                 $data[$property->getName()] = $this->extractSerializableDataFrom($property->getValue($something));
             }
@@ -164,6 +185,10 @@ final class JsonSerializer
         $decoded = json_decode($jsonEncodedData, true);
         if ($decoded === null && json_last_error()) {
             throw new \LogicException('You provided invalid JSON: ' . json_last_error_msg());
+        }
+
+        if (is_string($decoded)) {
+            throw new \LogicException('You cannot serialize a top-level object that implements ' . CollapseToSingleValue::class);
         }
 
         return $decoded;
