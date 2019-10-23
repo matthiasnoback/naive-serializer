@@ -4,6 +4,7 @@ declare(strict_types = 1);
 namespace NaiveSerializer;
 
 use Assert\Assertion;
+use PDO;
 use phpDocumentor\Reflection\DocBlock;
 use phpDocumentor\Reflection\DocBlock\Tags\Var_;
 use phpDocumentor\Reflection\DocBlockFactory;
@@ -11,9 +12,11 @@ use phpDocumentor\Reflection\Type;
 use phpDocumentor\Reflection\TypeResolver;
 use phpDocumentor\Reflection\Types\Array_;
 use phpDocumentor\Reflection\Types\Boolean;
+use phpDocumentor\Reflection\Types\Compound;
 use phpDocumentor\Reflection\Types\ContextFactory;
 use phpDocumentor\Reflection\Types\Float_;
 use phpDocumentor\Reflection\Types\Integer;
+use phpDocumentor\Reflection\Types\Null_;
 use phpDocumentor\Reflection\Types\Object_;
 use phpDocumentor\Reflection\Types\String_;
 
@@ -85,6 +88,16 @@ final class JsonSerializer
             return $processed;
         }
 
+        if ($type instanceof Compound) {
+            $innerTypes = iterator_to_array($type);
+            if (count($innerTypes) === 2) {
+                if ($innerTypes[0] instanceof Null_) {
+                    return $this->restoreDataStructure($innerTypes[1], $data);
+                } elseif ($innerTypes[1] instanceof Null_) {
+                    return $this->restoreDataStructure($innerTypes[0], $data);
+                }
+            }
+        }
         throw new \LogicException('Unsupported type: ' . get_class($type));
     }
 

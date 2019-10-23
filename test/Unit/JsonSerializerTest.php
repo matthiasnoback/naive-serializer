@@ -6,8 +6,10 @@ namespace NaiveSerializer\Test\Unit;
 use NaiveSerializer\Serializer;
 use NaiveSerializer\Test\Unit\Fixtures\ArrayCases;
 use NaiveSerializer\Test\Unit\Fixtures\DefaultValue;
+use NaiveSerializer\Test\Unit\Fixtures\Foo;
 use NaiveSerializer\Test\Unit\Fixtures\NoDocblock;
 use NaiveSerializer\Test\Unit\Fixtures\NoVarAnnotation;
+use NaiveSerializer\Test\Unit\Fixtures\NullCompoundType;
 use NaiveSerializer\Test\Unit\Fixtures\NullIsAllowed;
 use NaiveSerializer\Test\Unit\Fixtures\SimpleClass;
 use NaiveSerializer\Test\Unit\Fixtures\SupportedCases;
@@ -189,6 +191,32 @@ EOD;
         $expected->nullIsAllowed = null;
 
         $actual = Serializer::deserialize(NullIsAllowed::class, '{"nullIsAllowed":null}');
+
+        $this->assertEquals($expected, $actual);
+    }
+
+    /**
+     * @test
+     */
+    public function it_can_deal_with_possible_null_compound_types_when_deserializing()
+    {
+        $expected = new NullCompoundType();
+        $expected->nullOrFoo = new Foo('bar');
+
+        $actual = Serializer::deserialize(NullCompoundType::class, '{"nullOrFoo":{"foo":"bar"}}');
+
+        $this->assertEquals($expected, $actual);
+    }
+
+    /**
+     * @test
+     */
+    public function it_accepts_null_for_possible_null_compound_types_when_deserializing()
+    {
+        $expected = new NullCompoundType();
+        $expected->nullOrFoo = null;
+
+        $actual = Serializer::deserialize(NullCompoundType::class, '{"nullOrFoo":null}');
 
         $this->assertEquals($expected, $actual);
     }
