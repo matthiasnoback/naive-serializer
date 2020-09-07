@@ -4,6 +4,7 @@ declare(strict_types = 1);
 namespace NaiveSerializer;
 
 use Assert\Assertion;
+use LogicException;
 use phpDocumentor\Reflection\DocBlock\Tags\Var_;
 use phpDocumentor\Reflection\DocBlockFactory;
 use phpDocumentor\Reflection\Type;
@@ -17,6 +18,8 @@ use phpDocumentor\Reflection\Types\Integer;
 use phpDocumentor\Reflection\Types\Null_;
 use phpDocumentor\Reflection\Types\Object_;
 use phpDocumentor\Reflection\Types\String_;
+use ReflectionClass;
+use ReflectionProperty;
 
 final class JsonSerializer
 {
@@ -70,9 +73,9 @@ final class JsonSerializer
             Assertion::classExists($class);
             /** @var class-string $class */
 
-            $reflection = new \ReflectionClass($class);
+            $reflection = new ReflectionClass($class);
             if (!$reflection->isUserDefined()) {
-                throw new \LogicException(sprintf('Class "%s" is not user-defined', $type));
+                throw new LogicException(sprintf('Class "%s" is not user-defined', $type));
             }
 
             $object = $reflection->newInstanceWithoutConstructor();
@@ -107,7 +110,7 @@ final class JsonSerializer
                 }
             }
         }
-        throw new \LogicException('Unsupported type: ' . get_class($type));
+        throw new LogicException('Unsupported type: ' . get_class($type));
     }
 
     /**
@@ -130,9 +133,9 @@ final class JsonSerializer
         if (is_object($something)) {
             $data = [];
 
-            $reflection = new \ReflectionClass(get_class($something));
+            $reflection = new ReflectionClass(get_class($something));
             if (!$reflection->isUserDefined()) {
-                throw new \LogicException(sprintf('Class "%s" is not user-defined', $reflection->getName()));
+                throw new LogicException(sprintf('Class "%s" is not user-defined', $reflection->getName()));
             }
 
             foreach ($reflection->getProperties() as $property) {
@@ -159,14 +162,14 @@ final class JsonSerializer
             return $something;
         }
 
-        throw new \LogicException(sprintf(
+        throw new LogicException(sprintf(
             'Unsupported type: "%s" (%s). You can only serialize objects, arrays and scalar values.',
             gettype($something),
             var_export($something, true)
         ));
     }
 
-    private function resolvePropertyType(\ReflectionProperty $property, \ReflectionClass $class) : Type
+    private function resolvePropertyType(ReflectionProperty $property, ReflectionClass $class) : Type
     {
         $fileName = $class->getFileName() ?: '';
         Assertion::file($fileName, sprintf(
@@ -203,7 +206,7 @@ final class JsonSerializer
     {
         $decoded = json_decode($jsonEncodedData, true);
         if ($decoded === null && json_last_error()) {
-            throw new \LogicException('You provided invalid JSON: ' . json_last_error_msg());
+            throw new LogicException('You provided invalid JSON: ' . json_last_error_msg());
         }
 
         return $decoded;
