@@ -5,5 +5,5 @@ namespace NaiveSerializer\Test\Unit\Fixtures;
 
 final class NoDocblock
 {
-    public $noDocblock;
+    public string $noDocblock;
 }

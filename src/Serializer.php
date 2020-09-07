@@ -20,10 +20,9 @@ final class Serializer
     /**
      * @see JsonSerializer::serialize()
      *
-     * @param $rawData
-     * @return string
+     * @param mixed $rawData
      */
-    public static function serialize($rawData)
+    public static function serialize($rawData): string
     {
         return (new JsonSerializer())->serialize($rawData);
     }
