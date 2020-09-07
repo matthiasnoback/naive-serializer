@@ -117,6 +117,9 @@ final class JsonSerializer
             }
 
             foreach ($reflection->getProperties() as $property) {
+                if (strpos($property->getDocComment() ?: '', '@ignore') !== false) {
+                    continue;
+                }
                 $property->setAccessible(true);
                 $data[$property->getName()] = $this->extractSerializableDataFrom($property->getValue($something));
             }

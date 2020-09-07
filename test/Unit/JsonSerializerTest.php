@@ -7,6 +7,7 @@ use NaiveSerializer\Serializer;
 use NaiveSerializer\Test\Unit\Fixtures\ArrayCases;
 use NaiveSerializer\Test\Unit\Fixtures\DefaultValue;
 use NaiveSerializer\Test\Unit\Fixtures\Foo;
+use NaiveSerializer\Test\Unit\Fixtures\IgnoredProperty;
 use NaiveSerializer\Test\Unit\Fixtures\NoDocblock;
 use NaiveSerializer\Test\Unit\Fixtures\NoVarAnnotation;
 use NaiveSerializer\Test\Unit\Fixtures\NullCompoundType;
@@ -15,6 +16,7 @@ use NaiveSerializer\Test\Unit\Fixtures\SimpleClass;
 use NaiveSerializer\Test\Unit\Fixtures\SupportedCases;
 use NaiveSerializer\Test\Unit\Fixtures\UnsupportedType;
 use PHPUnit\Framework\TestCase;
+use stdClass;
 
 class JsonSerializerTest extends TestCase
 {
@@ -233,5 +235,28 @@ EOD;
         $actual = Serializer::deserialize(SimpleClass::class . '[]', '[{"property":"value"}]');
 
         $this->assertEquals($expected, $actual);
+    }
+
+    /**
+     * @test
+     */
+    public function it_ignores_properties_annotated_with_ignore(): void
+    {
+        $object = new IgnoredProperty();
+        $object->foo = 'bar';
+        $object->events = [new SimpleClass()];
+
+        self::assertJsonStringEqualsJsonString(
+            '{"foo":"bar"}',
+            Serializer::serialize($object)
+        );
+
+        $object = new IgnoredProperty();
+        $object->foo = 'bar';
+
+        self::assertEquals(
+            $object,
+            Serializer::deserialize(IgnoredProperty::class, '{"foo":"bar"}')
+        );
     }
 }
