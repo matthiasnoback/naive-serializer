@@ -1,8 +1,9 @@
 {
   "name": "matthiasnoback/naive-serializer",
+  "description": "A naive JSON serializer which recursively converts an object graph to and from JSON, without any configuration or custom code.",
   "type": "library",
   "require": {
-    "php": "^7.3",
+    "php": "^7.4",
     "beberlei/assert": "^3.2",
     "phpdocumentor/reflection-docblock": "^5.2"
   },
