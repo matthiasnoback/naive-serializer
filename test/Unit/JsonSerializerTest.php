@@ -7,6 +7,7 @@ use NaiveSerializer\Serializer;
 use NaiveSerializer\Test\Unit\Fixtures\ArrayCases;
 use NaiveSerializer\Test\Unit\Fixtures\DefaultValue;
 use NaiveSerializer\Test\Unit\Fixtures\Foo;
+use NaiveSerializer\Test\Unit\Fixtures\IgnoredProperty;
 use NaiveSerializer\Test\Unit\Fixtures\NoDocblock;
 use NaiveSerializer\Test\Unit\Fixtures\NoVarAnnotation;
 use NaiveSerializer\Test\Unit\Fixtures\NullCompoundType;
@@ -21,7 +22,7 @@ class JsonSerializerTest extends TestCase
     /**
      * @test
      */
-    public function it_serializes_and_deserializes_a_json_object()
+    public function it_serializes_and_deserializes_a_json_object(): void
     {
         $original = new Fixtures\SupportedCases();
         $original->a = 'a';
@@ -63,7 +64,7 @@ EOD;
     /**
      * @test
      */
-    public function it_serializes_and_deserializes_multiple_types_of_arrays()
+    public function it_serializes_and_deserializes_multiple_types_of_arrays(): void
     {
         $original = new ArrayCases();
         $original->intList = [1, 2, 3];
@@ -98,7 +99,7 @@ EOD;
     /**
      * @test
      */
-    public function you_cant_deserialize_built_in_classes()
+    public function you_cant_deserialize_built_in_classes(): void
     {
         $this->expectException(\LogicException::class);
         $this->expectExceptionMessage('not user-defined');
@@ -108,7 +109,7 @@ EOD;
     /**
      * @test
      */
-    public function you_cant_serialize_built_in_classes()
+    public function you_cant_serialize_built_in_classes(): void
     {
         $this->expectException(\LogicException::class);
         $this->expectExceptionMessage('not user-defined');
@@ -118,7 +119,7 @@ EOD;
     /**
      * @test
      */
-    public function you_need_to_provide_valid_json_data()
+    public function you_need_to_provide_valid_json_data(): void
     {
         $this->expectException(\LogicException::class);
         $this->expectExceptionMessage('invalid JSON');
@@ -129,7 +130,7 @@ EOD;
     /**
      * @test
      */
-    public function you_need_to_define_a_dockblock_for_all_properties()
+    public function you_need_to_define_a_dockblock_for_all_properties(): void
     {
         $this->expectException(\LogicException::class);
         $this->expectExceptionMessage('docblock');
@@ -140,7 +141,7 @@ EOD;
     /**
      * @test
      */
-    public function you_need_to_define_a_var_annotations_for_all_properties()
+    public function you_need_to_define_a_var_annotations_for_all_properties(): void
     {
         $this->expectException(\LogicException::class);
         $this->expectExceptionMessage('@var annotation');
@@ -151,7 +152,7 @@ EOD;
     /**
      * @test
      */
-    public function upon_deserialization_it_skips_properties_that_are_not_defined_in_the_data_and_keeps_default_values()
+    public function upon_deserialization_it_skips_properties_that_are_not_defined_in_the_data_and_keeps_default_values(): void
     {
         $expected = new DefaultValue();
 
@@ -163,7 +164,7 @@ EOD;
     /**
      * @test
      */
-    public function it_can_not_serialize_unsupported_types()
+    public function it_can_not_serialize_unsupported_types(): void
     {
         $this->expectException(\LogicException::class);
         $this->expectExceptionMessage('Unsupported type');
@@ -174,7 +175,7 @@ EOD;
     /**
      * @test
      */
-    public function it_can_not_deserialize_unsupported_types()
+    public function it_can_not_deserialize_unsupported_types(): void
     {
         $this->expectException(\LogicException::class);
         $this->expectExceptionMessage('Unsupported type');
@@ -185,7 +186,7 @@ EOD;
     /**
      * @test
      */
-    public function null_is_allowed_when_deserializing()
+    public function null_is_allowed_when_deserializing(): void
     {
         $expected = new NullIsAllowed();
         $expected->nullIsAllowed = null;
@@ -198,7 +199,7 @@ EOD;
     /**
      * @test
      */
-    public function it_can_deal_with_possible_null_compound_types_when_deserializing()
+    public function it_can_deal_with_possible_null_compound_types_when_deserializing(): void
     {
         $expected = new NullCompoundType();
         $expected->nullOrFoo = new Foo('bar');
@@ -211,7 +212,7 @@ EOD;
     /**
      * @test
      */
-    public function it_accepts_null_for_possible_null_compound_types_when_deserializing()
+    public function it_accepts_null_for_possible_null_compound_types_when_deserializing(): void
     {
         $expected = new NullCompoundType();
         $expected->nullOrFoo = null;
@@ -224,7 +225,7 @@ EOD;
     /**
      * @test
      */
-    public function you_can_deserialize_an_array()
+    public function you_can_deserialize_an_array(): void
     {
         $object = new SimpleClass();
         $object->property = 'value';
@@ -233,5 +234,28 @@ EOD;
         $actual = Serializer::deserialize(SimpleClass::class . '[]', '[{"property":"value"}]');
 
         $this->assertEquals($expected, $actual);
+    }
+
+    /**
+     * @test
+     */
+    public function it_ignores_properties_annotated_with_ignore(): void
+    {
+        $object = new IgnoredProperty();
+        $object->foo = 'bar';
+        $object->events = [new SimpleClass()];
+
+        self::assertJsonStringEqualsJsonString(
+            '{"foo":"bar"}',
+            Serializer::serialize($object)
+        );
+
+        $object = new IgnoredProperty();
+        $object->foo = 'bar';
+
+        self::assertEquals(
+            $object,
+            Serializer::deserialize(IgnoredProperty::class, '{"foo":"bar"}')
+        );
     }
 }

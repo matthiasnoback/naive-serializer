@@ -1,7 +1,9 @@
 <?php
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace NaiveSerializer\Test\Unit\Fixtures;
+
+use Assert\Assert;
 
 final class UnsupportedType
 {
@@ -12,6 +14,9 @@ final class UnsupportedType
 
     public function __construct()
     {
-        $this->unsupportedType = fopen(__FILE__, 'r');
+        $resource = fopen(__FILE__, 'r');
+        Assert::that($resource)->isResource();
+
+        $this->unsupportedType = $resource;
     }
 }

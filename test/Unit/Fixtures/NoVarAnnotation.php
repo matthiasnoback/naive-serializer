@@ -8,5 +8,5 @@ final class NoVarAnnotation
     /**
      * There is a description, but no var annotation.
      */
-    public $noVarAnnotation;
+    public string $noVarAnnotation;
 }

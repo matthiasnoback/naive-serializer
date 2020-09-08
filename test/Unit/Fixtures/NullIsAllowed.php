@@ -6,7 +6,7 @@ namespace NaiveSerializer\Test\Unit\Fixtures;
 final class NullIsAllowed
 {
     /**
-     * @var string
+     * @var string|null
      */
-    public $nullIsAllowed = 'default';
+    public ?string $nullIsAllowed = 'default';
 }

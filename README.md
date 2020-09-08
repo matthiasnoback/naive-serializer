@@ -89,6 +89,24 @@ $restoredObject = Serializer::deserialize(
 // $restoredObject will be of type Fully\Qualified\Class\Name
 ```
 
+You can force the (de)serializer to ignore certain properties by adding `@ignore` somewhere in its doc block:
+
+```php
+final class IgnoredProperty
+{
+    /**
+     * @var array<object>
+     * @ignore
+     */
+    public $events = [];
+
+    /**
+     * @var string
+     */
+    public $foo;
+}
+```
+
 If you like, you can create an instance of `JsonSerializer` and call its object methods instead of `Serializer`'s static methods.
 
 # Thanks

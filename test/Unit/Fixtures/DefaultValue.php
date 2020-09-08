@@ -5,5 +5,5 @@ namespace NaiveSerializer\Test\Unit\Fixtures;
 
 final class DefaultValue
 {
-    public $propertyWith = 'defaultValue';
+    public string $propertyWith = 'defaultValue';
 }
