@@ -71,6 +71,7 @@ final class JsonSerializer
             Assertion::isArray($data);
             $class = (string)$type;
             Assertion::classExists($class);
+            /** @var class-string $class */
 
             $reflection = new ReflectionClass($class);
             if (!$reflection->isUserDefined()) {
