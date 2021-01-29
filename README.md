@@ -1,7 +1,5 @@
 # Naive serializer
 
-[![Build Status](https://travis-ci.org/matthiasnoback/naive-serializer.svg?branch=master)](https://travis-ci.org/matthiasnoback/naive-serializer)
-
 The [JsonSerializer](src/JsonSerializer.php) that comes with this library is a very simple serializer/deserializer which recursively converts an object graph to and from JSON, without any configuration or custom code. Its design goals are:
 
 - Users shouldn't be forced to add custom configuration to their existing classes.
