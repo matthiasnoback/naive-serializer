@@ -6,6 +6,5 @@ parameters:
     checkMissingIterableValueType: false
     checkGenericClassInNonGenericObjectType: false
 includes:
-    - phpstan-baseline.neon
     - vendor/phpstan/phpstan-beberlei-assert/extension.neon
     - vendor/phpstan/phpstan-phpunit/extension.neon

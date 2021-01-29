@@ -99,6 +99,58 @@ EOD;
     /**
      * @test
      */
+    public function it_supports_PHP74_native_property_types(): void
+    {
+        $original = new Fixtures\NativePropertyTypes();
+        $original->string = 'a';
+        $original->int = 1;
+        $originalSub = new Fixtures\NativePropertyTypes();
+        $originalSub->string = 'a1';
+        $originalSub->int = 2;
+        $originalSub->bool = false;
+        $originalSub->float = 2.34;
+        $original->array = [$originalSub];
+        $original->bool = true;
+        $original->float = 1.23;
+
+        $serialized = Serializer::serialize($original);
+
+        $expectedJson = <<<EOD
+{
+    "string": "a",
+    "int":1,
+    "array": [
+        {
+            "string": "a1",
+            "int": 2,
+            "array": [],
+            "bool": false,
+            "float": 2.34,
+            "optionalString": null,
+            "optionalInt": null,
+            "optionalBool": null,
+            "optionalFloat": null
+        }
+    ],
+    "bool": true,
+    "float": 1.23,
+    "optionalString": null,
+    "optionalInt": null,
+    "optionalBool": null,
+    "optionalFloat": null
+}
+EOD;
+
+        $this->assertJsonStringEqualsJsonString($expectedJson, $serialized);
+
+        $deserialized = Serializer::deserialize(Fixtures\NativePropertyTypes::class, $serialized);
+
+        $this->assertEquals($original, $deserialized);
+    }
+
+    /**
+     * @test
+     */
     public function you_cant_deserialize_built_in_classes(): void
     {
         $this->expectException(\LogicException::class);

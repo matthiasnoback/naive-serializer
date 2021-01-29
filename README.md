@@ -1,7 +1,5 @@
 # Naive serializer
 
-[![Build Status](https://travis-ci.org/matthiasnoback/naive-serializer.svg?branch=master)](https://travis-ci.org/matthiasnoback/naive-serializer)
-
 The [JsonSerializer](src/JsonSerializer.php) that comes with this library is a very simple serializer/deserializer which recursively converts an object graph to and from JSON, without any configuration or custom code. Its design goals are:
 
 - Users shouldn't be forced to add custom configuration to their existing classes.
@@ -40,12 +38,22 @@ Furthermore, you need to define the types you used in standard `@var` docblock a
 
 Of course, every property should have just one `@var` annotation.
 
-You can define lists of the above types by simply adding `[]` to the `@var` annotation, e.g.
+For simple types, you can use PHP native property types as well:
+
+```php
+private string $string;
+private int $int;
+private bool $bool;
+private ClassName $object;
+```
+
+`array`-typed properties still require an additional `@var` annotation. You can define lists of the above types by simply adding `[]` to the `@var` annotation, e.g.
 
 ```php
 /**
  * @var Fully\Qualified\Class\Name[]
  */
+private array $array;
 ```
 
 To work around the limitation that you can't use PHP's built-in classes, simply convert the data internally to something else. For example, to use a `\DateTimeImmutable` timestamp:
