@@ -20,6 +20,7 @@ use phpDocumentor\Reflection\Types\Object_;
 use phpDocumentor\Reflection\Types\String_;
 use ReflectionClass;
 use ReflectionProperty;
+use ReflectionType;
 
 final class JsonSerializer
 {
@@ -171,6 +172,19 @@ final class JsonSerializer
 
     private function resolvePropertyType(ReflectionProperty $property, ReflectionClass $class) : Type
     {
+        $propertyType = $property->getType();
+        if ($propertyType instanceof ReflectionType) {
+            $resolvedType = $this->typeResolver->resolve((string)$propertyType);
+            if (!$resolvedType instanceof Array_) {
+                return $resolvedType;
+            }
+
+            /*
+             * If the native type is `array`, then it doesn't give us enough information to restore the value. We
+             * need to know what's inside the array, and we have to rely on an actual doc block for that.
+             */
+        }
+
         $fileName = $class->getFileName() ?: '';
         Assertion::file($fileName, sprintf(
             'Class "%s" has no source file, maybe it is a PHP built-in class?',

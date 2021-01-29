@@ -5,8 +5,6 @@ namespace NaiveSerializer\Test\Unit\Fixtures;
 
 final class NoVarAnnotation
 {
-    /**
-     * There is a description, but no var annotation.
-     */
-    public string $noVarAnnotation;
+    /** @phpstan-ignore-next-line */
+    public $noVarAnnotation;
 }

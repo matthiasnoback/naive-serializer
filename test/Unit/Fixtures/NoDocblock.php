@@ -5,5 +5,6 @@ namespace NaiveSerializer\Test\Unit\Fixtures;
 
 final class NoDocblock
 {
-    public string $noDocblock;
+    // @phpstan-ignore-next-line
+    public $noDocblock;
 }
