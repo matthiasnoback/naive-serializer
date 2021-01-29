@@ -19,8 +19,11 @@ use phpDocumentor\Reflection\Types\Null_;
 use phpDocumentor\Reflection\Types\Object_;
 use phpDocumentor\Reflection\Types\String_;
 use ReflectionClass;
+use ReflectionNamedType;
 use ReflectionProperty;
 use ReflectionType;
+use ReflectionUnionType;
+use RuntimeException;
 
 final class JsonSerializer
 {
@@ -174,7 +177,15 @@ final class JsonSerializer
     {
         $propertyType = $property->getType();
         if ($propertyType instanceof ReflectionType) {
-            $resolvedType = $this->typeResolver->resolve((string)$propertyType);
+            if ($propertyType instanceof ReflectionUnionType) {
+                throw new RuntimeException('PHP 8.0 union types are not supported');
+            }
+
+            if (!$propertyType instanceof ReflectionNamedType) {
+                throw new RuntimeException('Unknown property type: ' . get_class($propertyType));
+            }
+
+            $resolvedType = $this->typeResolver->resolve($propertyType->getName());
             if (!$resolvedType instanceof Array_) {
                 return $resolvedType;
             }
